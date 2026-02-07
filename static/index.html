@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolyBio DALY Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .toggle-checkbox:checked { right: 0; border-color: #F97316; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #F97316; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+    <nav class="bg-black text-white p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tight"><span class="text-orange-500">PolyBio</span> DALY Simulator</h1>
+            <span class="text-xs text-gray-400 uppercase tracking-widest">Interactive Beta</span>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto mt-8 p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Intervention Toggles</h2>
+            <div class="space-y-6">
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-700">Clean Indoor Air</div>
+                        <div class="text-xs text-gray-500">Reduces infection risk by 74%</div>
+                    </div>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" id="clean_air" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
+                        <label for="clean_air" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-700">Rapid Diagnostics</div>
+                        <div class="text-xs text-gray-500">Reduces severity & spread</div>
+                    </div>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" id="diagnostics" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
+                        <label for="diagnostics" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-700">Nose Sprays</div>
+                        <div class="text-xs text-gray-500">Reduces infection risk by 57%</div>
+                    </div>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" id="nose_sprays" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
+                        <label for="nose_sprays" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-700">Acute Treatment</div>
+                        <div class="text-xs text-gray-500">Reduces PASC incidence</div>
+                    </div>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" id="acute_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
+                        <label for="acute_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <div class="font-semibold text-gray-700">Long COVID Treatment</div>
+                        <div class="text-xs text-gray-500">Reduces chronic duration</div>
+                    </div>
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                        <input type="checkbox" id="lc_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
+                        <label for="lc_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gray-800">
+                    <div class="text-gray-500 text-xs uppercase font-bold tracking-wider">Projected Burden (DALYs)</div>
+                    <div class="text-4xl font-extrabold mt-2 text-gray-900" id="val_simulated">362,095,599</div>
+                    <div class="text-gray-400 text-sm mt-1">Current Scenario Estimate</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500">
+                    <div class="text-gray-500 text-xs uppercase font-bold tracking-wider">Burden Averted</div>
+                    <div class="text-4xl font-extrabold mt-2 text-orange-500" id="val_averted">0</div>
+                    <div class="text-green-600 text-sm mt-1 font-bold" id="val_percent">0% Reduction</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm h-96">
+                <canvas id="dalyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart Initialization
+        const ctx = document.getElementById('dalyChart').getContext('2d');
+        const dalyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Baseline (No Intervention)', 'Your Scenario'],
+                datasets: [
+                    { label: 'Acute COVID', data: [63965091, 63965091], backgroundColor: '#CBD5E1', stack: 'Stack 0' },
+                    { label: 'Long COVID', data: [4066119, 4066119], backgroundColor: '#FDBA74', stack: 'Stack 0' },
+                    { label: 'PASC (Organ Disease)', data: [294064389, 294064389], backgroundColor: '#F97316', stack: 'Stack 0' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + new Intl.NumberFormat('en-US').format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { callback: function(value) { return value / 1000000 + 'M'; } } }
+                }
+            }
+        });
+
+        async function updateModel() {
+            const payload = {
+                clean_air: document.getElementById('clean_air').checked,
+                diagnostics: document.getElementById('diagnostics').checked,
+                nose_sprays: document.getElementById('nose_sprays').checked,
+                acute_treatment: document.getElementById('acute_treatment').checked,
+                lc_treatment: document.getElementById('lc_treatment').checked
+            };
+
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+
+                // Update UI Numbers
+                document.getElementById('val_simulated').innerText = data.simulated_dalys.toLocaleString();
+                document.getElementById('val_averted').innerText = data.dalys_averted.toLocaleString();
+                document.getElementById('val_percent').innerText = data.reduction_percentage + "% Reduction";
+
+                // Update Chart
+                dalyChart.data.datasets[0].data[1] = data.breakdown.acute;
+                dalyChart.data.datasets[1].data[1] = data.breakdown.long_covid;
+                dalyChart.data.datasets[2].data[1] = data.breakdown.pasc;
+                dalyChart.update();
+
+            } catch (error) {
+                console.error("API Error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
