@@ -7,128 +7,145 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .toggle-checkbox:checked { right: 0; border-color: #F97316; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #F97316; }
+        :root {
+            --poly-blue: #2334ab;
+            --poly-light-blue: #3962e8;
+            --poly-dark: #0c0c0d;
+        }
+        .toggle-checkbox:checked { right: 0; border-color: var(--poly-blue); }
+        .toggle-checkbox:checked + .toggle-label { background-color: var(--poly-blue); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-    <nav class="bg-black text-white p-4 shadow-lg">
+    <nav class="bg-white border-b border-gray-200 p-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight"><span class="text-orange-500">PolyBio</span> DALY Simulator</h1>
-            <span class="text-xs text-gray-400 uppercase tracking-widest">Interactive Beta</span>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-[#2334ab] rounded-sm"></div>
+                <h1 class="text-2xl font-bold tracking-tight text-[#0c0c0d]">PolyBio <span class="text-[#2334ab] font-light">Research</span></h1>
+            </div>
+            <span class="text-xs font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600">DALY MODEL V1.0</span>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto mt-8 p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="max-w-7xl mx-auto mt-8 p-4 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
         
-        <div class="lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
-            <h2 class="text-xl font-bold mb-6 text-gray-800">Intervention Toggles</h2>
-            <div class="space-y-6">
-                <div class="flex items-center justify-between group">
-                    <div>
-                        <div class="font-semibold text-gray-700">Clean Indoor Air</div>
-                        <div class="text-xs text-gray-500">Reduces infection risk by 74%</div>
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold mb-6 text-[#2334ab] uppercase tracking-wide">Interventions</h2>
+                <div class="space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div><div class="font-semibold">Clean Indoor Air</div><div class="text-xs text-gray-500">74% Infection Reduction</div></div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="clean_air" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/><label for="clean_air" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label></div>
                     </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                        <input type="checkbox" id="clean_air" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
-                        <label for="clean_air" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    <div class="flex items-center justify-between">
+                        <div><div class="font-semibold">Rapid Diagnostics</div><div class="text-xs text-gray-500">Reduces Spread & Severity</div></div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="diagnostics" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/><label for="diagnostics" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label></div>
                     </div>
-                </div>
-                <div class="flex items-center justify-between group">
-                    <div>
-                        <div class="font-semibold text-gray-700">Rapid Diagnostics</div>
-                        <div class="text-xs text-gray-500">Reduces severity & spread</div>
+                    <div class="flex items-center justify-between">
+                        <div><div class="font-semibold">Nose Sprays</div><div class="text-xs text-gray-500">57% Infection Reduction</div></div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="nose_sprays" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/><label for="nose_sprays" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label></div>
                     </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                        <input type="checkbox" id="diagnostics" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
-                        <label for="diagnostics" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    <div class="flex items-center justify-between">
+                        <div><div class="font-semibold">Acute Treatment</div><div class="text-xs text-gray-500">Reduces PASC & Severity</div></div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="acute_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/><label for="acute_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label></div>
                     </div>
-                </div>
-                <div class="flex items-center justify-between group">
-                    <div>
-                        <div class="font-semibold text-gray-700">Nose Sprays</div>
-                        <div class="text-xs text-gray-500">Reduces infection risk by 57%</div>
-                    </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                        <input type="checkbox" id="nose_sprays" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
-                        <label for="nose_sprays" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
+                    <div class="flex items-center justify-between">
+                        <div><div class="font-semibold">Long COVID Tx</div><div class="text-xs text-gray-500">Reduces LC Duration</div></div>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none"><input type="checkbox" id="lc_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/><label for="lc_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label></div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between group">
-                    <div>
-                        <div class="font-semibold text-gray-700">Acute Treatment</div>
-                        <div class="text-xs text-gray-500">Reduces PASC incidence</div>
-                    </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                        <input type="checkbox" id="acute_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
-                        <label for="acute_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between group">
-                    <div>
-                        <div class="font-semibold text-gray-700">Long COVID Treatment</div>
-                        <div class="text-xs text-gray-500">Reduces chronic duration</div>
-                    </div>
-                    <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                        <input type="checkbox" id="lc_treatment" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer transition-all duration-300" onclick="updateModel()"/>
-                        <label for="lc_treatment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300"></label>
-                    </div>
-                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-4">Detailed Comparison</h3>
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+                        <tr><th class="px-3 py-2">Category</th><th class="px-3 py-2">Baseline</th><th class="px-3 py-2 text-[#2334ab]">Scenario</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr><td class="px-3 py-2 font-medium">Acute</td><td class="px-3 py-2">64M</td><td class="px-3 py-2 text-[#2334ab]" id="tbl-acute">64M</td></tr>
+                        <tr><td class="px-3 py-2 font-medium">Long COVID</td><td class="px-3 py-2">4M</td><td class="px-3 py-2 text-[#2334ab]" id="tbl-lc">4M</td></tr>
+                        <tr><td class="px-3 py-2 font-medium">PASC</td><td class="px-3 py-2">294M</td><td class="px-3 py-2 text-[#2334ab]" id="tbl-pasc">294M</td></tr>
+                        <tr class="bg-blue-50 font-bold"><td class="px-3 py-2">TOTAL</td><td class="px-3 py-2">362M</td><td class="px-3 py-2 text-[#2334ab]" id="tbl-total">362M</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <div class="lg:col-span-8 space-y-6">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gray-800">
-                    <div class="text-gray-500 text-xs uppercase font-bold tracking-wider">Projected Burden (DALYs)</div>
-                    <div class="text-4xl font-extrabold mt-2 text-gray-900" id="val_simulated">362,095,599</div>
-                    <div class="text-gray-400 text-sm mt-1">Current Scenario Estimate</div>
+                <div class="bg-[#0c0c0d] p-6 rounded-xl shadow-lg text-white">
+                    <div class="text-gray-400 text-xs uppercase font-bold tracking-wider">Projected Burden (DALYs)</div>
+                    <div class="text-4xl font-bold mt-2" id="val_simulated">362,095,599</div>
+                    <div class="text-gray-500 text-sm mt-1">Status Quo Estimate</div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500">
-                    <div class="text-gray-500 text-xs uppercase font-bold tracking-wider">Burden Averted</div>
-                    <div class="text-4xl font-extrabold mt-2 text-orange-500" id="val_averted">0</div>
-                    <div class="text-green-600 text-sm mt-1 font-bold" id="val_percent">0% Reduction</div>
+                <div class="bg-[#2334ab] p-6 rounded-xl shadow-lg text-white">
+                    <div class="text-blue-200 text-xs uppercase font-bold tracking-wider">Burden Averted</div>
+                    <div class="text-4xl font-bold mt-2" id="val_averted">0</div>
+                    <div class="text-blue-200 text-sm mt-1 font-bold" id="val_percent">0% Reduction</div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm h-96">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Total Impact Analysis</h3>
                 <canvas id="dalyChart"></canvas>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase mb-2">PASC Composition</h3>
+                    <div class="h-64 relative"><canvas id="pascChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase mb-2">Impact by Age</h3>
+                    <div class="h-64 relative"><canvas id="ageChart"></canvas></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Chart Initialization
-        const ctx = document.getElementById('dalyChart').getContext('2d');
-        const dalyChart = new Chart(ctx, {
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#666';
+
+        // 1. Main Chart
+        const dalyChart = new Chart(document.getElementById('dalyChart'), {
             type: 'bar',
             data: {
-                labels: ['Baseline (No Intervention)', 'Your Scenario'],
+                labels: ['Baseline', 'Scenario'],
                 datasets: [
-                    { label: 'Acute COVID', data: [63965091, 63965091], backgroundColor: '#CBD5E1', stack: 'Stack 0' },
-                    { label: 'Long COVID', data: [4066119, 4066119], backgroundColor: '#FDBA74', stack: 'Stack 0' },
-                    { label: 'PASC (Organ Disease)', data: [294064389, 294064389], backgroundColor: '#F97316', stack: 'Stack 0' }
+                    { label: 'Acute', data: [64, 64], backgroundColor: '#cbd5e1', stack: '0' },
+                    { label: 'Long COVID', data: [4, 4], backgroundColor: '#93c5fd', stack: '0' },
+                    { label: 'PASC', data: [294, 294], backgroundColor: '#2334ab', stack: '0' }
                 ]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + new Intl.NumberFormat('en-US').format(context.parsed.y);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { callback: function(value) { return value / 1000000 + 'M'; } } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: {grid:{display:false}}, y: {beginAtZero:true} } }
+        });
+
+        // 2. PASC Chart
+        const pascChart = new Chart(document.getElementById('pascChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cardiovascular', 'Diabetes', 'Neuro', 'Kidney', 'Others'],
+                datasets: [{
+                    data: [41, 16, 12, 9, 22],
+                    backgroundColor: ['#2334ab', '#3962e8', '#60a5fa', '#93c5fd', '#cbd5e1'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: {legend:{position:'right'}} }
+        });
+
+        // 3. Age Chart
+        const ageChart = new Chart(document.getElementById('ageChart'), {
+            type: 'bar',
+            data: {
+                labels: ['0-17', '18-64', '65+'],
+                datasets: [{ label: 'DALYs (M)', data: [15, 180, 167], backgroundColor: '#3962e8', borderRadius: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} }
         });
 
         async function updateModel() {
@@ -140,29 +157,32 @@
                 lc_treatment: document.getElementById('lc_treatment').checked
             };
 
-            try {
-                const response = await fetch('/api/simulate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
+            const res = await fetch('/api/simulate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const data = await res.json();
 
-                // Update UI Numbers
-                document.getElementById('val_simulated').innerText = data.simulated_dalys.toLocaleString();
-                document.getElementById('val_averted').innerText = data.dalys_averted.toLocaleString();
-                document.getElementById('val_percent').innerText = data.reduction_percentage + "% Reduction";
+            // Text
+            document.getElementById('val_simulated').innerText = data.simulated_dalys.toLocaleString();
+            document.getElementById('val_averted').innerText = data.dalys_averted.toLocaleString();
+            document.getElementById('val_percent').innerText = data.reduction_percentage + "%";
 
-                // Update Chart
-                dalyChart.data.datasets[0].data[1] = data.breakdown.acute;
-                dalyChart.data.datasets[1].data[1] = data.breakdown.long_covid;
-                dalyChart.data.datasets[2].data[1] = data.breakdown.pasc;
-                dalyChart.update();
+            // Table
+            document.getElementById('tbl-acute').innerText = (data.breakdown.acute / 1e6).toFixed(0) + "M";
+            document.getElementById('tbl-lc').innerText = (data.breakdown.long_covid / 1e6).toFixed(1) + "M";
+            document.getElementById('tbl-pasc').innerText = (data.breakdown.pasc / 1e6).toFixed(0) + "M";
+            document.getElementById('tbl-total').innerText = (data.simulated_dalys / 1e6).toFixed(0) + "M";
 
-            } catch (error) {
-                console.error("API Error:", error);
-            }
+            // Charts
+            dalyChart.data.datasets[0].data[1] = data.breakdown.acute / 1e6;
+            dalyChart.data.datasets[1].data[1] = data.breakdown.long_covid / 1e6;
+            dalyChart.data.datasets[2].data[1] = data.breakdown.pasc / 1e6;
+            dalyChart.update();
+
+            const pb = data.pasc_condition_breakdown;
+            pascChart.data.datasets[0].data = [pb.Cardiovascular, pb.Diabetes, pb.Neurological, pb.Kidney, pb.Other+pb.Musculoskeletal+pb.Gastrointestinal];
+            pascChart.update();
+
+            ageChart.data.datasets[0].data = [data.age_breakdown.group_0_17/1e6, data.age_breakdown.group_18_64/1e6, data.age_breakdown.group_65_plus/1e6];
+            ageChart.update();
         }
     </script>
 </body>
