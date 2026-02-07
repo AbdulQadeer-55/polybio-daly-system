@@ -1,0 +1,17 @@
+{
+    "baseline_dalys": 362095599,
+    "breakdown_shares": {
+        "acute_share": 0.176652495022454,
+        "long_covid_share": 0.01122940740298807,
+        "pasc_share": 0.8121180975745579
+    },
+    "efficacies": {
+        "clean_air": 0.74,
+        "nose_sprays": 0.57,
+        "diagnostics_risk": 0.2,
+        "diagnostics_sev": 0.25,
+        "acute_tx_sev": 0.64,
+        "acute_tx_pasc": 0.26,
+        "lc_tx_severity": 0.55
+    }
+}
