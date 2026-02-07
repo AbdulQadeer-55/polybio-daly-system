@@ -8,7 +8,6 @@ OUTPUT_PATH = "data/processed/model_constants.json"
 def extract_excel_data():
     print(f"--- 📊 STARTING DATA EXTRACTION ---")
     
-    # Defaults (The Gold Standard Values from your Analysis)
     baseline_dalys = 362095599
     breakdown = {
         "acute_val": 63965091,
@@ -16,12 +15,9 @@ def extract_excel_data():
         "pasc_val": 294064389
     }
     
-    # Try to read Excel if present to confirm
     if os.path.exists(EXCEL_PATH):
         try:
             print("✅ Excel File Found. Verifying data...")
-            # We use the defaults as the primary source of truth for stability
-            # but reading the file confirms path correctness
             pd.read_excel(EXCEL_PATH, sheet_name="Inputs", nrows=5)
             print("✅ Excel Read Successful.")
         except Exception as e:
@@ -29,7 +25,6 @@ def extract_excel_data():
     else:
         print("⚠️ Excel file not found in data/raw/. Using standard constants.")
 
-    # Construct the Data Packet
     data = {
         "baseline_dalys": baseline_dalys,
         "breakdown_shares": {

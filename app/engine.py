@@ -18,9 +18,8 @@ class PolyBioEngine:
                     "acute_share": 0.1766,
                     "long_covid_share": 0.0112,
                     "pasc_share": 0.8122,
-                    # NEW: Death vs Disability Ratios from Excel Results
-                    "yll_share": 0.855, # 309M / 362M
-                    "yld_share": 0.145  # 52M / 362M
+                    "yll_share": 0.855,
+                    "yld_share": 0.145
                 },
                 "efficacies": {
                     "clean_air": 0.74, "nose_sprays": 0.57, "diagnostics_risk": 0.20,
@@ -38,7 +37,6 @@ class PolyBioEngine:
         base_dalys = self.data["baseline_dalys"]
         shares = self.data["breakdown_shares"]
 
-        # --- 1. MODIFIERS ---
         mod_infection = 1.0
         if request_dict["clean_air"]: mod_infection *= (1.0 - eff["clean_air"])
         if request_dict["nose_sprays"]: mod_infection *= (1.0 - eff["nose_sprays"])
@@ -54,12 +52,10 @@ class PolyBioEngine:
         mod_lc_severity = 1.0
         if request_dict["lc_treatment"]: mod_lc_severity *= (1.0 - eff["lc_tx_severity"])
 
-        # --- 2. BUCKETS ---
         sim_acute = (base_dalys * shares["acute_share"]) * mod_infection * mod_severity
         sim_lc = (base_dalys * shares["long_covid_share"]) * mod_infection * mod_lc_severity
         sim_pasc = (base_dalys * shares["pasc_share"]) * mod_infection * mod_pasc_incidence
 
-        # --- 3. AGGREGATE ---
         total_simulated = int(sim_acute + sim_lc + sim_pasc)
         dalys_averted = int(base_dalys - total_simulated)
         
@@ -67,12 +63,8 @@ class PolyBioEngine:
         if base_dalys > 0:
             reduction_pct = round((dalys_averted / base_dalys) * 100, 1)
 
-        # --- 4. BREAKDOWNS ---
-        # YLL/YLD Split (Applied to the new total)
-        # Note: Acute Tx reduces mortality, so we could tweak this, 
-        # but fixed ratio is sufficient for MVP visualization.
-        yll_val = int(total_simulated * shares["yll_share"])
-        yld_val = int(total_simulated * shares["yld_share"])
+        yll_val = int(total_simulated * shares.get("yll_share", 0.855))
+        yld_val = int(total_simulated * shares.get("yld_share", 0.145))
 
         age_breakdown = {
             "group_0_17": int(total_simulated * 0.041),

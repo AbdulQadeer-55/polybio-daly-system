@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.schemas import SimulationRequest, SimulationResponse
 from app.engine import PolyBioEngine
+from app.reporting import ReportGenerator
 
 app = FastAPI(title="PolyBio DALY Model API")
 
@@ -16,7 +17,6 @@ app.add_middleware(
 )
 
 engine = PolyBioEngine()
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -25,9 +25,24 @@ async def read_root():
 
 @app.post("/api/simulate", response_model=SimulationResponse)
 async def simulate(request: SimulationRequest):
-    result = engine.run_simulation(request.dict())
-    return result
+    return engine.run_simulation(request.dict())
 
-@app.get("/api/health")
-async def health_check():
-    return {"status": "active", "system": "PolyBio Markov Engine"}
+@app.post("/api/export/csv")
+async def export_csv(request: SimulationRequest):
+    data = engine.run_simulation(request.dict())
+    csv_file = ReportGenerator.generate_csv(data)
+    return Response(
+        content=csv_file.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=PolyBio_Results.csv"}
+    )
+
+@app.post("/api/export/pdf")
+async def export_pdf(request: SimulationRequest):
+    data = engine.run_simulation(request.dict())
+    pdf_bytes = ReportGenerator.generate_pdf(data, request.dict())
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=PolyBio_Report.pdf"}
+    )
