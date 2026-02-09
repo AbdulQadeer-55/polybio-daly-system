@@ -18,9 +18,9 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 bg-[#2334ab] rounded-sm"></div>
-                <h1 class="text-2xl font-bold tracking-tight text-[#0c0c0d]">PolyBio <span class="text-[#2334ab] font-light">Research</span></h1>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[#0c0c0d]">PolyBio Research <span class="text-[#2334ab] font-light">Foundation</span></h1>
             </div>
-            <span class="text-xs font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600">DALY MODEL V2.0</span>
+            <span class="text-xs font-semibold bg-gray-100 px-3 py-1 rounded-full text-gray-600">DALY MODEL V2.1</span>
         </div>
     </nav>
 
@@ -83,7 +83,9 @@
 
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
                 <h3 class="text-sm font-bold text-gray-500 uppercase mb-4">Total Impact Analysis</h3>
-                <canvas id="dalyChart"></canvas>
+                <div class="relative h-64">
+                    <canvas id="dalyChart"></canvas>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -104,35 +106,20 @@
     </div>
 
     <script>
+        // --- CHARTS CONFIG ---
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.color = '#666';
+        Chart.defaults.maintainAspectRatio = false;
 
-        const dalyChart = new Chart(document.getElementById('dalyChart'), {
-            type: 'bar',
-            data: { labels: ['Baseline', 'Scenario'], datasets: [
-                { label: 'Acute', data: [64, 64], backgroundColor: '#cbd5e1', stack: '0' },
-                { label: 'Long COVID', data: [4, 4], backgroundColor: '#93c5fd', stack: '0' },
-                { label: 'PASC', data: [294, 294], backgroundColor: '#2334ab', stack: '0' }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, scales: { x:{grid:{display:false}}, y:{beginAtZero:true} } }
-        });
+        // Global instances
+        let dalyChart = null;
+        let pascChart = null;
+        let mortChart = null;
+        let ageChart = null;
 
-        const pascChart = new Chart(document.getElementById('pascChart'), {
-            type: 'doughnut',
-            data: { labels: ['Cardio', 'Diabetes', 'Neuro', 'Kidney', 'Others'], datasets: [{ data: [41, 16, 12, 9, 22], backgroundColor: ['#2334ab', '#3962e8', '#60a5fa', '#93c5fd', '#cbd5e1'], borderWidth:0 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: {legend:{display:false}} }
-        });
-
-        const mortChart = new Chart(document.getElementById('mortChart'), {
-            type: 'pie',
-            data: { labels: ['YLL (Death)', 'YLD (Disability)'], datasets: [{ data: [309, 52], backgroundColor: ['#ef4444', '#3b82f6'], borderWidth:0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{position:'bottom'}} }
-        });
-
-        const ageChart = new Chart(document.getElementById('ageChart'), {
-            type: 'bar',
-            data: { labels: ['0-17', '18-64', '65+'], datasets: [{ label: 'DALYs (M)', data: [15, 180, 167], backgroundColor: '#3962e8', borderRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} }
+        // Initial Load
+        document.addEventListener("DOMContentLoaded", () => {
+            updateModel(); // This will fetch data and render charts for the first time
         });
 
         async function updateModel() {
@@ -144,33 +131,73 @@
                 lc_treatment: document.getElementById('lc_treatment').checked
             };
 
-            const res = await fetch('/api/simulate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/simulate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                const data = await res.json();
 
-            document.getElementById('val_simulated').innerText = data.simulated_dalys.toLocaleString();
-            document.getElementById('val_averted').innerText = data.dalys_averted.toLocaleString();
-            document.getElementById('val_percent').innerText = data.reduction_percentage + "%";
-            
-            document.getElementById('tbl-acute').innerText = (data.breakdown.acute / 1e6).toFixed(0) + "M";
-            document.getElementById('tbl-lc').innerText = (data.breakdown.long_covid / 1e6).toFixed(1) + "M";
-            document.getElementById('tbl-pasc').innerText = (data.breakdown.pasc / 1e6).toFixed(0) + "M";
-            document.getElementById('tbl-yll').innerText = (data.breakdown.yll / 1e6).toFixed(0) + "M";
-            document.getElementById('tbl-yld').innerText = (data.breakdown.yld / 1e6).toFixed(0) + "M";
+                // 1. UPDATE TEXT
+                document.getElementById('val_simulated').innerText = data.simulated_dalys.toLocaleString();
+                document.getElementById('val_averted').innerText = data.dalys_averted.toLocaleString();
+                document.getElementById('val_percent').innerText = data.reduction_percentage + "%";
+                
+                document.getElementById('tbl-acute').innerText = (data.breakdown.acute / 1e6).toFixed(0) + "M";
+                document.getElementById('tbl-lc').innerText = (data.breakdown.long_covid / 1e6).toFixed(1) + "M";
+                document.getElementById('tbl-pasc').innerText = (data.breakdown.pasc / 1e6).toFixed(0) + "M";
+                document.getElementById('tbl-yll').innerText = (data.breakdown.yll / 1e6).toFixed(0) + "M";
+                document.getElementById('tbl-yld').innerText = (data.breakdown.yld / 1e6).toFixed(0) + "M";
 
-            dalyChart.data.datasets[0].data[1] = data.breakdown.acute / 1e6;
-            dalyChart.data.datasets[1].data[1] = data.breakdown.long_covid / 1e6;
-            dalyChart.data.datasets[2].data[1] = data.breakdown.pasc / 1e6;
-            dalyChart.update();
+                // 2. RENDER CHARTS (CHANGE 2: Destroy & Recreate pattern to prevent vanishing glitch)
+                renderCharts(data);
 
+            } catch (e) {
+                console.error("Update failed", e);
+            }
+        }
+
+        function renderCharts(data) {
+            // --- 1. Main Bar Chart ---
+            if (dalyChart) dalyChart.destroy();
+            dalyChart = new Chart(document.getElementById('dalyChart'), {
+                type: 'bar',
+                data: { labels: ['Baseline', 'Scenario'], datasets: [
+                    { label: 'Acute', data: [64, data.breakdown.acute/1e6], backgroundColor: '#cbd5e1', stack: '0' },
+                    { label: 'Long COVID', data: [4, data.breakdown.long_covid/1e6], backgroundColor: '#93c5fd', stack: '0' },
+                    { label: 'PASC', data: [294, data.breakdown.pasc/1e6], backgroundColor: '#2334ab', stack: '0' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { x:{grid:{display:false}}, y:{beginAtZero:true} } }
+            });
+
+            // --- 2. PASC Doughnut (The one that was vanishing) ---
+            if (pascChart) pascChart.destroy();
             const pb = data.pasc_condition_breakdown;
-            pascChart.data.datasets[0].data = [pb.Cardiovascular, pb.Diabetes, pb.Neurological, pb.Kidney, pb.Other+pb.Musculoskeletal+pb.Gastrointestinal];
-            pascChart.update();
+            pascChart = new Chart(document.getElementById('pascChart'), {
+                type: 'doughnut',
+                data: { 
+                    labels: ['Cardio', 'Diabetes', 'Neuro', 'Kidney', 'Others'], 
+                    datasets: [{ 
+                        data: [pb.Cardiovascular, pb.Diabetes, pb.Neurological, pb.Kidney, pb.Other+pb.Musculoskeletal+pb.Gastrointestinal], 
+                        backgroundColor: ['#2334ab', '#3962e8', '#60a5fa', '#93c5fd', '#cbd5e1'], 
+                        borderWidth:0 
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: {legend:{display:false}} }
+            });
 
-            mortChart.data.datasets[0].data = [data.breakdown.yll / 1e6, data.breakdown.yld / 1e6];
-            mortChart.update();
+            // --- 3. Mortality Pie ---
+            if (mortChart) mortChart.destroy();
+            mortChart = new Chart(document.getElementById('mortChart'), {
+                type: 'pie',
+                data: { labels: ['YLL (Death)', 'YLD (Disability)'], datasets: [{ data: [data.breakdown.yll/1e6, data.breakdown.yld/1e6], backgroundColor: ['#ef4444', '#3b82f6'], borderWidth:0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{position:'bottom'}} }
+            });
 
-            ageChart.data.datasets[0].data = [data.age_breakdown.group_0_17/1e6, data.age_breakdown.group_18_64/1e6, data.age_breakdown.group_65_plus/1e6];
-            ageChart.update();
+            // --- 4. Age Bar ---
+            if (ageChart) ageChart.destroy();
+            ageChart = new Chart(document.getElementById('ageChart'), {
+                type: 'bar',
+                data: { labels: ['0-17', '18-64', '65+'], datasets: [{ label: 'DALYs (M)', data: [data.age_breakdown.group_0_17/1e6, data.age_breakdown.group_18_64/1e6, data.age_breakdown.group_65_plus/1e6], backgroundColor: '#3962e8', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} }
+            });
         }
 
         async function downloadReport(type) {
