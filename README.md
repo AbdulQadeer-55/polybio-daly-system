@@ -40,3 +40,45 @@ prioritized-pairwise-gen/
 │   └── test_generator.py  # Unit tests for seeds and avoids
 ├── requirements.txt
 └── README.md
+🛠️ Installation
+Clone the repository:
+
+Bash
+git clone [https://github.com/YOUR_USERNAME/prioritized-pairwise-gen.git](https://github.com/YOUR_USERNAME/prioritized-pairwise-gen.git)
+cd prioritized-pairwise-gen
+Install dependencies:
+
+Bash
+pip install -r requirements.txt
+📖 Usage
+1. Basic Demo (Table 5 Replication)
+Run the standard demo to verify the algorithm against the paper's specific example:
+
+Bash
+python3 examples/demo_run.py
+Output: Generates a test suite and saves it to demo_results.csv.
+
+2. Web Services Case Study
+Run the "Reliability" case study, which generates tests for Rain, Temperature, and Wind forecasting services based on their reliability ratings :
+
+Bash
+python3 examples/case_study_webservices.py
+3. Visual Proof (Generate Graph)
+To see the prioritization in action, generate the Cumulative Weight Curve:
+
+Bash
+python3 examples/plot_results.py
+Output: Creates examples/cumulative_weight_curve.png.
+
+
+Interpretation: The blue curve (Weighted) will rise significantly faster than the linear baseline, proving that the algorithm successfully prioritizes important tests.
+
+🧪 Testing
+Run the automated unit tests to verify that constraints (Seeds and Avoids) are strictly respected:
+
+Bash
+python3 -m pytest tests/test_generator.py
+📄 Reference
+Bryce, R. C., & Colbourn, C. J. (2006). Prioritized interaction testing for pair-wise coverage with seeding and constraints. Information and Software Technology, 48(10), 960-970. 
+
+Developed by: Abdul Qadeer
